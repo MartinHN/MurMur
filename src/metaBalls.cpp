@@ -199,7 +199,7 @@ void metaBalls::draw(int w, int h){
             if(drawLines && i<points.size()-1){
                 ofSetLineWidth(2);
                 
-                ofLine(points[i]*scale,points[i+1]*scale);
+                ofDrawLine(points[i]*scale,points[i+1]*scale);
             }
         }
         

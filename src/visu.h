@@ -10,7 +10,7 @@
 //#ifndef VISU_H
 //#define VISU_H
 
-
+#if USE_CUSTOM_VISUX
 #include "ofMain.h"
 //#include "ofxVoronoi.h"
 #include "VisuHandler.h"
@@ -109,7 +109,7 @@ public:
     // Geometric Parameters
     ofVec2f curdir;
     int thickness;
-    vector<ofVec2f> traj;
+    vector<glm::vec2> traj;
     int border;
     int res;
     int amp;
@@ -209,5 +209,5 @@ public:
     
 };
 
-
+#endif
 //#endif

@@ -11,6 +11,10 @@
 
 //#define LIVEBLUR
 
+#define USE_SYPHON 0
+#define USE_KINECT 1
+#define USE_REMOTE_KINECT 0
+
 #define VISU_OSC_IN  12344
 #define VISU_OSC_OUT 12346
 
@@ -27,7 +31,8 @@
 #define PIPE_H SYPHON_H
 
 #define MYPARAM(nom,init,min,max) nom.setName(#nom);nom.setMin(min);nom.setMax(max);settings.add(nom);nom=init;
-
+#include "ofMain.h"
+//using namespace std;
 //#define GUIMODE
 
 

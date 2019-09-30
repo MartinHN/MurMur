@@ -136,11 +136,11 @@ void CircleLine::draw(int w, int h){
             myfbo.begin();
             
             ofSetColor(255);
-            ofLine(ofPoint(0,0), left);
-            ofLine(ofPoint(0,h), left);
+            ofDrawLine(ofPoint(0,0), left);
+            ofDrawLine(ofPoint(0,h), left);
             
-            ofLine(ofPoint(w,0), right);
-            ofLine(ofPoint(w,h), right);
+            ofDrawLine(ofPoint(w,0), right);
+            ofDrawLine(ofPoint(w,h), right);
             
             myfbo.end();
             
@@ -315,7 +315,7 @@ void movingline::draw(){
         ofSetColor(0);
     else
         ofSetColor(255);
-    ofLine(begin, end);
+    ofDrawLine(begin, end);
     
     
 }

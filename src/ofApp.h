@@ -83,9 +83,7 @@ public:
     
     //Video INPUTS
 
-#ifdef syphon  
-    ofxSyphonClient blobClient;
-#endif
+
     pingPongBuffer finalRender;
 
 #if defined testvid || localcamera

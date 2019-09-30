@@ -43,9 +43,9 @@ void Liner::draw(int w, int h){
             
             ofRotateY(360.0*rotAngle/b[i].size());
             
-            ofLine(b[i][j]-ofVec3f(centr.x,0),b[i][(j+steps)%(b[i].size())]-ofVec3f(centr.x,0,0));
+            ofDrawLine(b[i][j]-ofVec3f(centr.x,0),b[i][(j+steps)%(b[i].size())]-ofVec3f(centr.x,0,0));
             
-            if(drawCentr)ofLine(b[i][j]-ofVec3f(centr.x,0),ofVec3f(0,centr.y));
+            if(drawCentr)ofDrawLine(b[i][j]-ofVec3f(centr.x,0),ofVec3f(0,centr.y));
         }
         ofPopMatrix();
     }

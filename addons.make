@@ -1,5 +1,7 @@
 ofxGui
+ofxKinect
 ofxNetwork
 ofxOpenCv
 ofxOsc
+ofxSyphon
 ofxXmlSettings

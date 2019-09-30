@@ -9,8 +9,28 @@
 
 
 #include "BlobHandler.h"
-#define USE_ONE_CHANNEL 1
+#if USE_SYPHON
+#include "ofxSyphon.h"
+#elif USE_KINECT
+#include "ofxKinect.h"
+#elif USE_REMOTE_KINECT
+#include "ofxOsc.h"
+#else
+#pragma error should  use at least osc kinect
+#endif
 
+#define USE_ONE_CHANNEL 1
+BlobHandler::BlobHandler(){
+#if USE_SYPHON
+     blobClient.reset( new ofxSyphonClient());
+#elif USE_KINECT
+    kinect.reset(new ofxKinect());
+#elif USE_REMOTE_KINECT
+    oscRcv.reset(new ofxOscReciever());
+#endif
+
+}
+BlobHandler::~BlobHandler(){}
 void BlobHandler::setup(int inwin, int inhin,ScreenHandler * sHin){
     inw = inwin;
     inh = inhin;
@@ -24,28 +44,42 @@ void BlobHandler::setup(int inwin, int inhin,ScreenHandler * sHin){
 void BlobHandler::setupData(ofShader* blurXin,ofShader * blurYin){
     blurX=blurXin;
     blurY = blurYin;
-    blobClient.setup();
-        blobClient.setApplicationName("kinectExample");
-//    blobClient.setApplicationName("kinectExampleDebug");
+#if USE_SYPHON
+    blobClient->setup();
+    blobClient->setApplicationName("kinectExample");
+    //    blobClient.setApplicationName("kinectExampleDebug");
     //    blobClient.setServerName("blob");
     //    blobClient.setApplicationName("Simple Server");
-//    blobClient.setApplicationName("Arena");
+    //    blobClient.setApplicationName("Arena");
     //    blobClient.setServerName("");
+#elif USE_KINECT
+    kinect->init(false,false);
+    //kinect.init(true); // shows infrared instead of RGB video image
+    //kinect.init(false, false); // disable video image (faster fps)
+
+    kinect->open();        // opens first available kinect
+                          // print the intrinsic IR sensor values
+    if(!kinect->isConnected()) {
+        ofLogError() << "can't connect kinect";
+    }
+#elif USE_REMOTE_KINECT
+
+
+#endif
+
+
 #if USE_ONE_CHANNEL
-    syphonTex.allocate(inw,inh,GL_R8);
-//    pix.allocate(inw,inh,1);
+    depthTex.allocate(inw,inh,GL_R8);
+    //    pix.allocate(inw,inh,1);
 #else
-    syphonTex.allocate(inw,inh,GL_RGB);
+    depthTex.allocate(inw,inh,GL_RGB);
     pix.allocate(inw,inh,3);
 #endif
+
 
     gs.allocate(inw, inh);
     lastw = inw;
     lasth = inh;
-
-
-
-
 
     colorIm.allocate(inw,inh);
 }
@@ -53,14 +87,14 @@ void BlobHandler::setupData(ofShader* blurXin,ofShader * blurYin){
 
 void BlobHandler::update(){
     if(computeBlob){
-    getSyphonTex();
-    getGS();
+        updateDepthTex();
+        getGS();
 
-    compBlob();
-    compCache();
-    arms = compExtrems();
-    centroids = compCentroid();
-    boxes = compBounds();
+        compBlob();
+        compCache();
+        arms = compExtrems();
+        centroids = compCentroid();
+        boxes = compBounds();
     }
     else{
         arms.clear();
@@ -116,43 +150,50 @@ void BlobHandler::registerParams(){
 //
 //void BlobHandler::computePoly(){
 //
-//    syphonTex.dst->begin();
+//    depthTex.dst->begin();
 //    threshBW.begin();
 //    threshBW.setUniformTexture("tex",blobClient.getTexture(),1);
 //
 //
 //    threshBW.end();
-//    syphonTex.dst->end();
+//    depthTex.dst->end();
 //
 //    ofxCvGrayscaleImage bw ;
-//    bw.getTextureReference() = syphonTex.src->getTextureReference();
+//    bw.getTextureReference() = depthTex.src->getTextureReference();
 //    bw.threshold(40);
 //
 //}
 
-void BlobHandler::getSyphonTex(){
+void BlobHandler::updateDepthTex(){
+#if USE_SYPHON
 #if USE_ONE_CHANNEL
     //    glBlendEquation(GL_FUNC_ADD_EXT);
     //
     //    glBlendFunc(GL_SRC_COLOR, GL_ONE_MINUS_DST_ALPHA);
     //
-    //    syphonTex.dst->begin();
+    //    depthTex.dst->begin();
     //    ofSetColor(255);
     //    blobClient.draw(0,0);
-    //    syphonTex.dst->end();
-    //    syphonTex.swap();
+    //    depthTex.dst->end();
+    //    depthTex.swap();
 
 #else
     glBlendEquation(GL_FUNC_ADD_EXT);
 
     glBlendFunc(GL_SRC_COLOR, GL_ONE_MINUS_DST_ALPHA);
 
-    syphonTex.begin();
+    depthTex.begin();
     ofSetColor(255);
-    blobClient.draw(0,0);
-    syphonTex.end();
+    blobClient->draw(0,0);
+    depthTex.end();
 #endif
+#elif USE_KINECT
+    kinect->update();
+//    if(kinect.isFrameNewDepth()) { // there is a new frame and we are connected
+//        calib.computeOnTexture(kinect.getDepthTextureReference(),true);
 
+#elif USE_REMOTE_KINECT
+#endif
 
 
 }
@@ -164,35 +205,42 @@ void BlobHandler::getGS(){
 
     glBlendColor(1,1,1,blobBlur/255.0);
     glBlendFunc(GL_CONSTANT_ALPHA, GL_ONE_MINUS_CONSTANT_ALPHA);
-//    glBlendFunc(GL_CONSTANT_ALPHA, GL_CONSTANT_ALPHA);
-    syphonTex.begin();
+    //    glBlendFunc(GL_CONSTANT_ALPHA, GL_CONSTANT_ALPHA);
+    depthTex.begin();
     if(vidThreshold>0 ){
         threshBW.begin();
         threshBW.setUniform1f("thresh",(float)(vidThreshold/255.0f));
         threshBW.setUniform1f("colOn",invertBW?0:1);
         threshBW.setUniform1f("colOff",invertBW?1:0);
     }
-//    ofSetColor(0);//,0,0,blobBlur);
-//    ofRect(0, 0, blobClient.getWidth(), blobClient.getHeight());
+    //    ofSetColor(0);//,0,0,blobBlur);
+    //    ofRect(0, 0, blobClient.getWidth(), blobClient.getHeight());
 
-//    ofSetColor(255);
-    blobClient.draw(0,0);
+    //    ofSetColor(255);
+#if USE_SYPHON
+    blobClient->draw(0,0);
+#elif USE_KINECT
+    kinect->getDepthTexture().draw(0,0);
+#elif USE_REMOTE_KINECT
+#pragma error TODO
+#endif
     if(vidThreshold>0){
         threshBW.end();
     }
-    syphonTex.end();
+    depthTex.end();
     ofEnableAlphaBlending();
-    auto & tr = syphonTex.getTextureReference();
+    auto & tr = depthTex.getTextureReference();
     tr.bind();
     glGetTexImage(tr.texData.textureTarget,0,GL_RED,GL_UNSIGNED_BYTE, gs.getPixels().getData());
     tr.unbind();
     
-    //    syphonTex.dst->readToPixels(pix);
-//    gs.setFromPixels(pix);
+    //    depthTex.dst->readToPixels(pix);
+    //    gs.setFromPixels(pix);
     //    gs.updateTexture();
 
 #else
-    syphonTex.readToPixels(pix);
+
+    getDepthTex().readToPixels(pix);
     colorIm.setFromPixels(pix);
     colorIm.updateTexture();
     gs = colorIm;
@@ -204,13 +252,19 @@ void BlobHandler::getGS(){
 
 
 
-
+const ofTexture & BlobHandler::getDepthTex()const{
+#if USE_SYPHON
+    return depthTex;
+#elif USE_KINECT
+    return kinect->getDepthTexture();
+#endif
+}
 void BlobHandler::compBlob(){
-//#if !USE_ONE_CHANNEL
+    //#if !USE_ONE_CHANNEL
     if(vidThreshold >0){
         gs.threshold(vidThreshold,invertBW);
     }
-//#endif
+    //#endif
     contourFinder.findContours(gs, minSide*inw*inh*minSide, maxSide*inw*inh*maxSide, maxBlobs, findHoles);
 
     blobs = contourFinder.blobs;
@@ -282,7 +336,7 @@ void BlobHandler::compCache(){
             pp = pp.getSmoothed(smooth);
         }
         if(polyMaxPoints>0){pp=pp.getResampledByCount(polyMaxPoints);}
-//        if(polySpacing>0){pp=pp.getResampledBySpacing(polySpacing);}
+        //        if(polySpacing>0){pp=pp.getResampledBySpacing(polySpacing);}
         if(pp.size()>0){
             pp.close();
 
@@ -417,7 +471,7 @@ vector<ofVec3f> BlobHandler::compExtrems(float w, float h){
                 sum-=1;
                 idx+=sum;
                 if(idx>tmpspaced.size()){
-                idx-=tmpspaced.size();
+                    idx-=tmpspaced.size();
                 }
 
                 ofPoint p =tmpspaced.getPointAtIndexInterpolated(idx);
@@ -440,24 +494,24 @@ vector<ofVec3f> BlobHandler::compExtrems(float w, float h){
                     }
                 }
                 if(!test){continue;}
-//                if(abs((p-tmpspaced.getCentroid2D()).getNormalized().dot(ofVec2f(1,0)))>cos(ofDegToRad(80))){
-//                if(center.distance(p)>0.1){
+                //                if(abs((p-tmpspaced.getCentroid2D()).getNormalized().dot(ofVec2f(1,0)))>cos(ofDegToRad(80))){
+                //                if(center.distance(p)>0.1){
 
 
 
-//                    for(int i = begin ; i < end ; i++){
-//                        auto & pp = tmpspaced[i%tmpspaced.size()] ;
-//                        res.push_back(pp*ofVec2f(w,h));
-//                    }
-//                    res.push_back(center*ofVec2f(w,h));
+                //                    for(int i = begin ; i < end ; i++){
+                //                        auto & pp = tmpspaced[i%tmpspaced.size()] ;
+                //                        res.push_back(pp*ofVec2f(w,h));
+                //                    }
+                //                    res.push_back(center*ofVec2f(w,h));
                 res.push_back(p*ofVec2f(w,h));
 
                 //                    if(test == false)ofLogWarning("no extrem");
                 begin = end;
                 sum_angles=0;
                 tmpp.clear();
-                }
-//            }
+            }
+            //            }
         }
     }
 
@@ -475,24 +529,24 @@ vector<ofVec3f> BlobHandler::compExtrems(float w, float h){
 //    glBlendFunc(GL_SRC_COLOR, GL_ONE_MINUS_DST_ALPHA);
 //    gs.dilate_3x3();
 //
-//    syphonTex.dst->begin();
+//    depthTex.dst->begin();
 //    ofSetColor(255);
 //    blurX->begin();
 //    blurX->setUniform1f("blurAmnt", blobBlur);
 //    gs.draw(0,0,inw,inh);
 //    blurX->end();
-//    syphonTex.dst->end();
+//    depthTex.dst->end();
 //    glFlush();
 //
-//    syphonTex.swap();
+//    depthTex.swap();
 //
-//    syphonTex.dst->begin();
+//    depthTex.dst->begin();
 //    blurY->begin();
 //    blurY->setUniform1f("blurAmnt", blobBlur);
-//    syphonTex.src->draw(0,0,inw,inh);
+//    depthTex.src->draw(0,0,inw,inh);
 //    blurY->end();
-//    syphonTex.dst->end();
-//    syphonTex.swap();
+//    depthTex.dst->end();
+//    depthTex.swap();
 //    ofPopMatrix();
 //    ofPopStyle();
 //    ofPopView();

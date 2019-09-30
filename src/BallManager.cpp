@@ -225,13 +225,13 @@ void BallManager::draw(int w, int h){
                     
                     if(j>0)
                     {
-                        ofLine(listOfBalls.at(index).pos*ofPoint(w, h),listOfBalls.at(numCol*i + (j-1)).pos*ofPoint(w,h));
+                        ofDrawLine(listOfBalls.at(index).pos*ofPoint(w, h),listOfBalls.at(numCol*i + (j-1)).pos*ofPoint(w,h));
 
        
                     }
                     if(i>0)
                     {
-                        ofLine(listOfBalls.at(index).pos*ofPoint(w, h),listOfBalls.at(numCol*(i-1) + j).pos*ofPoint(w,h));
+                        ofDrawLine(listOfBalls.at(index).pos*ofPoint(w, h),listOfBalls.at(numCol*(i-1) + j).pos*ofPoint(w,h));
                     }
                     
                 

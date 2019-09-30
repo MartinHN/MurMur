@@ -6,6 +6,8 @@
 //  Copyright 2013 __MyCompanyName__. All rights reserved.
 //
 
+#if USE_CUSTOM_VISUX
+
 #include "visu.h"
 
 
@@ -213,7 +215,7 @@ void MagicStar::draw(){
             ofPoint pointLine1 = ofPoint( radius2*cos(1*star_angle), radius2*sin(1*star_angle));
             ofPoint pointLine2 = ofPoint( radius2*cos(9*star_angle), radius2*sin(9*star_angle));
             
-            //ofLine(pointLine1, pointLine2) ;
+            //ofDrawLine(pointLine1, pointLine2) ;
             
             
         }
@@ -233,45 +235,45 @@ void MagicStar::draw(){
             ofSetLineWidth((int)6);
         else ofSetLineWidth(2);
         
-        ofLine(point0, point1);
-        ofLine(point1, point2);
-        ofLine(point2, point3);
-        ofLine(point3, point4);
-        ofLine(point4, point5);
-        ofLine(point5, point6);
-        ofLine(point6, point7);
-        ofLine(point7, point8);
-        ofLine(point8, point9);
-        ofLine(point9, point10);
-        ofLine(point10, point11);
-        ofLine(point11, point12);
-        ofLine(point12, point13);
-        ofLine(point13, point14);
-        ofLine(point14, point15);
-        ofLine(point15, point16);
-        ofLine(point16, point0);
+        ofDrawLine(point0, point1);
+        ofDrawLine(point1, point2);
+        ofDrawLine(point2, point3);
+        ofDrawLine(point3, point4);
+        ofDrawLine(point4, point5);
+        ofDrawLine(point5, point6);
+        ofDrawLine(point6, point7);
+        ofDrawLine(point7, point8);
+        ofDrawLine(point8, point9);
+        ofDrawLine(point9, point10);
+        ofDrawLine(point10, point11);
+        ofDrawLine(point11, point12);
+        ofDrawLine(point12, point13);
+        ofDrawLine(point13, point14);
+        ofDrawLine(point14, point15);
+        ofDrawLine(point15, point16);
+        ofDrawLine(point16, point0);
         
         if(actualMode)
             ofSetLineWidth((int)1);
         else ofSetLineWidth(3);
         
-        ofLine(ofPoint(0,0), point1);
-        //ofLine(ofPoint(0,0), point2);
-        ofLine(ofPoint(0,0), point3);
-        //ofLine(ofPoint(0,0), point4);
-        ofLine(ofPoint(0,0), point5);
-        //ofLine(ofPoint(0,0), point6);
-        ofLine(ofPoint(0,0), point7);
-        //ofLine(ofPoint(0,0), point8);
-        ofLine(ofPoint(0,0), point9);
-        //ofLine(ofPoint(0,0), point10);
-        ofLine(ofPoint(0,0), point11);
-        //ofLine(ofPoint(0,0), point12);
-        ofLine(ofPoint(0,0), point13);
-        //ofLine(ofPoint(0,0), point14);
-        ofLine(ofPoint(0,0), point15);
-        //ofLine(ofPoint(0,0), point16);
-        // ofLine(ofPoint(0,0), point0);
+        ofDrawLine(ofPoint(0,0), point1);
+        //ofDrawLine(ofPoint(0,0), point2);
+        ofDrawLine(ofPoint(0,0), point3);
+        //ofDrawLine(ofPoint(0,0), point4);
+        ofDrawLine(ofPoint(0,0), point5);
+        //ofDrawLine(ofPoint(0,0), point6);
+        ofDrawLine(ofPoint(0,0), point7);
+        //ofDrawLine(ofPoint(0,0), point8);
+        ofDrawLine(ofPoint(0,0), point9);
+        //ofDrawLine(ofPoint(0,0), point10);
+        ofDrawLine(ofPoint(0,0), point11);
+        //ofDrawLine(ofPoint(0,0), point12);
+        ofDrawLine(ofPoint(0,0), point13);
+        //ofDrawLine(ofPoint(0,0), point14);
+        ofDrawLine(ofPoint(0,0), point15);
+        //ofDrawLine(ofPoint(0,0), point16);
+        // ofDrawLine(ofPoint(0,0), point0);
         
         
         
@@ -416,7 +418,7 @@ void Poolerv::draw(float env,bool isFbo){
     for(int k = 0 ; k< traj.size();k++){
         poly.lineTo(traj[k]);
 //        if(k>1&&ofRandom(3)>2){
-//            ofLine(traj[k], 2*traj[k]-traj[k-1]);
+//            ofDrawLine(traj[k], 2*traj[k]-traj[k-1]);
 //        }
     }
     poly.draw();
@@ -597,10 +599,10 @@ void Spider::draw(float audioenv,int inw,int inh){
             bool lr=p.x>(inw)/2;
             if(sub>0){
                 for(int j=0;j<2*(sub+1);j++){
-                    ofLine(ofVec2f((j%(sub+1)+(j<(sub+1)?count:-count))*(inw)/sub,j<(sub+1)?0:(inh)),p);
+                    ofDrawLine(ofVec3f((j%(sub+1)+(j<(sub+1)?count:-count))*(inw)/sub,j<(sub+1)?0:(inh)),p);
                 }
                 for(int j=0;j<2*(sub+1);j++){
-                    ofLine(ofVec2f(j<(sub+1)?0:(inw),(j%(sub+1)+(j<(sub+1)?-count:+count))*(inh)/sub),p);
+                    ofDrawLine(ofVec3f(j<(sub+1)?0:(inw),(j%(sub+1)+(j<(sub+1)?-count:+count))*(inh)/sub),p);
                 }
             }
 
@@ -756,3 +758,4 @@ void MagicPlanet::draw(){
     ofPopMatrix();
     
 }
+#endif

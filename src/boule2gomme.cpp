@@ -31,7 +31,7 @@ void boule2gomme::draw(int w, int h){
     
 
     ofSetColor(255);
-    if(drawSyphon) dad->bH->syphonTex.draw(0,0);
+    if(drawSyphon) dad->bH->getDepthTex().draw(0,0);
     
     if(drawPipe){dad->pipePP.src->draw(0,0);}
     if(drawGSBlob) {dad->bH->gs.flagImageChanged();dad->bH->gs.updateTexture();dad->bH->gs.draw(0, 0);}

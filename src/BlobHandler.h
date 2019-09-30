@@ -8,27 +8,37 @@
 
 #pragma once
 
+
+#include "Constants.h"
+
 #include "EcranHandler.h"
 #include "ofxOpenCv.h"
-#include "ofxSyphon.h"
-#include "Constants.h"
+
 #include "ofMain.h"
 
+#if USE_SYPHON
+class ofxSyphonClient;
+#elif USE_KINECT
+class ofxKinect;
+#elif USE_REMOTE_KINECT
+class ofxOscReciever ;
+#endif
 
 class BlobHandler{
     
 public:
     
-    BlobHandler(){};
-    
+    BlobHandler();
+    ~BlobHandler();
     
     void setup(int inwin, int inhin,ScreenHandler * sH);
     
     
-//    void computePoly();
+    //    void computePoly();
+    const ofTexture & getDepthTex()const;
     void update();
-//    void blurblob();
-    void getSyphonTex();
+    //    void blurblob();
+    void updateDepthTex();
     void getGS();
     void compBlob();
     void registerParams();
@@ -51,10 +61,16 @@ public:
 
     int inw,inh;
     
-    
-    ofxSyphonClient blobClient;
+#if USE_SYPHON
+    std::unique_ptr<ofxSyphonClient> blobClient;
+#elif USE_KINECT
+    std::unique_ptr<ofxKinect> kinect;
+#elif USE_REMOTE_KINECT
+    std::unique_ptr<ofxOscReciever> oscRcv;
+#endif
 
-    ofFbo syphonTex;
+
+    ofFbo depthTex;
 
 
     ScreenHandler * sH;
@@ -86,4 +102,5 @@ public:
     ofParameter<ofVec3f> scale,pos;
     ofParameter<bool> isPiping;
 };
+
 
