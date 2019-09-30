@@ -6,6 +6,9 @@
 //  Copyright 2014 __MyCompanyName__. All rights reserved.
 //
 #pragma once
+
+#include "Constants.h"
+#if USE_CUSTOM_VISUX
 #include "ofMain.h"
 #include "VisuHandler.h"
 #include "ofxOsc.h"
@@ -61,3 +64,4 @@ private:
     float env;
     
 };
+#endif

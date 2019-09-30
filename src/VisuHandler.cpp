@@ -41,12 +41,7 @@ void VisuHandler::setup(AttrCtl *attrctl,BlobHandler* bHin, int inwin, int inhin
     
     
     
-    
-    
-    
 }
-
-
 
 
 VisuClass * VisuHandler::get(const string & name){
@@ -91,7 +86,7 @@ void VisuHandler::updateHighFPS(){
 
 
 ofImage * VisuHandler::getSharedImg(int i){
-    if(i>sharedImg.size())return;
+    if(i>sharedImg.size())return nullptr;
     return &sharedImg[i];
 }
 

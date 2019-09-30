@@ -10,6 +10,7 @@
 
 #include "CircleLine.h"
 
+#if USE_CUSTOM_VISUX
 
 CircleLine::CircleLine(){}
 
@@ -319,3 +320,4 @@ void movingline::draw(){
     
     
 }
+#endif

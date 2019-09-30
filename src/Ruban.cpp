@@ -7,7 +7,7 @@
 //
 
 #include "Ruban.h"
-
+#if USE_CUSTOM_VISUX
 Spring::Spring(){
     
 }
@@ -350,3 +350,4 @@ void ColorRuban::changeLength(float &f){
 }
 
 
+#endif

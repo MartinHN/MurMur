@@ -40,7 +40,7 @@ public:
   
 //    void writeFile();
     
-    Boolean isEditingScreens;
+    bool isEditingScreens;
     
     vector<Ecran *> screenL;
     ofParameterGroup screensParam;

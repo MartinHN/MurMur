@@ -23,7 +23,7 @@
 #define SERVER_PORT 20000
 
 
-#define VISU_OSC_IP_OUT "localhost"
+#define VISU_OSC_IP_OUT "nano.local"
 
 #define SYPHON_W 640
 #define SYPHON_H 480

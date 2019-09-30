@@ -59,9 +59,9 @@ class VisuHandler;
 class VisuClass{
     
 public:
-    VisuClass();
-    virtual ~VisuClass(){ofLogVerbose("base visu destructor");};
     VisuClass(VisuHandler *vh);
+    virtual ~VisuClass(){ofLogVerbose("base visu destructor");};
+
     
     void updateVh(VisuHandler* vh);
     virtual void update(int w, int h)=0;

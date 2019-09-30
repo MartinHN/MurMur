@@ -51,7 +51,7 @@ public:
 
 class AutoTree : public VisuClass{
 public:
-    AutoTree();
+ 
     AutoTree(VisuHandler * v);
     AutoTree(int w, int h, bool autostart, ofPath* pathin);
     

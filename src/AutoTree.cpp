@@ -8,9 +8,7 @@
 
 #include "AutoTree.h"
 
-AutoTree::AutoTree(){
-    
-}
+
 
 AutoTree::AutoTree(VisuHandler * v):VisuClass(v){
     

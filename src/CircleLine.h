@@ -7,13 +7,13 @@
 //
 //TODO: make it a visuClass
 
-#ifndef __MurMurDombre__CircleLine__
-#define __MurMurDombre__CircleLine__
-
+#pragma once
+#include "Constants.h"
+#if USE_CUSTOM_VISUX
 #include <iostream>
 #include "ofMain.h"
 
-#endif /* defined(__MurMurDombre__CircleLine__) */
+
 
 //---------------------------------------------------------------------
 //                              Line
@@ -97,3 +97,5 @@ public:
 
 
     
+
+#endif

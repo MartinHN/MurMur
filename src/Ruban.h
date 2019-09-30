@@ -5,12 +5,10 @@
 //  Created by Aurélien Conil on 16/08/13.
 //
 //
-
-#ifndef __MursMurentDombres__Ruban__
-#define __MursMurentDombres__Ruban__
-
+#pragma once
 //#define OSCSEND
-
+#include "Constants.h"
+#if USE_CUSTOM_VISUX
 #include <iostream>
 //#include <vector.h>
 #include "ofMain.h"
@@ -117,4 +115,5 @@ public:
     
 };
 
-#endif /* defined(__MursMurentDombres__Ruban__) */
+
+#endif //CUSTOM VISUX

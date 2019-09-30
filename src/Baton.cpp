@@ -9,6 +9,7 @@
 #include "Baton.h"
 
 
+#if USE_CUSTOM_VISUX
 
 //Baton::Baton(VisuHandler * v):VisuClass(v){
 //    
@@ -311,3 +312,4 @@ void Baton::draw(int w, int h){
 //    
 //}
 
+#endif
