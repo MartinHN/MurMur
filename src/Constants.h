@@ -15,16 +15,7 @@
 #define USE_KINECT 1
 #define USE_REMOTE_KINECT 0
 
-#define VISU_OSC_IN  12344
-#define VISU_OSC_OUT 12346
 
-#define VISU_OSC_IN2 11000
-#define VISU_OSC_OUT2 11001
-#define SERVER_PORT 20000
-
-
-#define VISU_OSC_IP_OUT "nano.local"
-#define UI_IP "_gateway"
 #define SYPHON_W 640
 #define SYPHON_H 480
 #define PIPE_W SYPHON_W

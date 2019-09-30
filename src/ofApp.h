@@ -33,7 +33,7 @@
 
 
 
-#include "CamWiggler.h"
+//#include "CamWiggler.h"
 
 //#include "ofxXmlSettings.h"
 //#include "ofx3DModelLoader.h"

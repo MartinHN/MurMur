@@ -6,6 +6,9 @@
 //  Copyright 2013 __MyCompanyName__. All rights reserved.
 //
 #pragma once
+
+#include "Constants.h"
+#if USE_CUSTOM_VISUX
 #include "ofMain.h"
 
 class CamWiggler {
@@ -31,3 +34,4 @@ public:
     void update(int beat);
     
 };
+#endif

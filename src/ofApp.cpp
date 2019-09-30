@@ -1,6 +1,17 @@
 #include "ofApp.h"
 
+#define VISU_OSC_IN  12344
+#define VISU_OSC_OUT 12346
 
+#define VISU_OSC_IN2 11000
+#define VISU_OSC_OUT2 11001
+#define SERVER_PORT 20000
+
+
+//#define VISU_OSC_IP_OUT "nano.local"
+//#define UI_IP "_gateway"
+#define VISU_OSC_IP_OUT "localhost"
+#define UI_IP "localhost"
 
 //--------------------------------------------------------------
 void ofApp::setup(){

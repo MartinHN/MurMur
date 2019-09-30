@@ -9,6 +9,8 @@
 #include "CamWiggler.h"
 
 
+#if USE_CUSTOM_VISUX
+
 CamWiggler::CamWiggler(){
     amplitude = 65;
     damp=7;
@@ -55,3 +57,4 @@ void CamWiggler::update(int beat){
     }
     
 }
+#endif
