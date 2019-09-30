@@ -24,7 +24,7 @@
 
 
 #define VISU_OSC_IP_OUT "nano.local"
-
+#define UI_IP "_gateway"
 #define SYPHON_W 640
 #define SYPHON_H 480
 #define PIPE_W SYPHON_W

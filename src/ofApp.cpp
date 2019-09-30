@@ -196,7 +196,7 @@ void ofApp::setup(){
     visuHandler.setupData();
     bH.setupData(&blurX,&blurY);
     sH.setupData();
-    paramSync.setup(globalParam,VISU_OSC_OUT,"localhost",VISU_OSC_IN);
+    paramSync.setup(globalParam,VISU_OSC_OUT,UI_IP,VISU_OSC_IN);
 
 
 #endif
