@@ -90,12 +90,14 @@ public:
 #endif
     int lastw,lasth;
     
-    ofFbo origins;
+    ofFbo origins,originLR,originHB;
+    void updateDeltas();
+
     ofShader updatePos;
     ofShader updateRender;
 
     ofParameter<float>      timeStep,timeStepM;
-
+    ofParameter<bool>       is2D;
     ofParameter<int>        numParticles ;
     pingPongBuffer          velPingPong;
     pingPongBuffer          posPingPong;
@@ -121,8 +123,10 @@ public:
     
     ofImage gradient;
     bool noReset;
-    
 
+    vector<float>  originPos;
+    
+    int lastOriType;
     
 };
 

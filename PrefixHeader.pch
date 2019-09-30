@@ -1,0 +1,17 @@
+//
+//  PrefixHeader.pch
+//  MurMur d'Ombre
+//
+//  Created by Martin Hermant on 06/11/2018.
+//
+//
+
+#ifndef PrefixHeader_pch
+#define PrefixHeader_pch
+#ifdef __cplusplus
+#include "ofMain.h"
+#endif
+// Include any system framework and library headers here that should be included in all compilation units.
+// You will also need to set the Prefix Header build setting of one or more of your targets to reference this file.
+
+#endif /* PrefixHeader_pch */

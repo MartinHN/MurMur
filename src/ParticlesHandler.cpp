@@ -27,11 +27,13 @@ Force::Force(string namein,bool isAttr){
     isActive = false;
     
     attrFamilly = -2;
-    if(isAttr) {    
+    if(isAttr) {
         MYPARAM(attrFamilly,0,-1,13);
         MYPARAM(attrZone,0,0,3);
-    pl.push_back(&attrFamilly);
-    pl.push_back(&attrZone);}
+        pl.push_back(&attrFamilly);
+        pl.push_back(&attrZone);
+
+    }
     
 }
 
@@ -48,15 +50,15 @@ void Force::updateShader(){
 
     for (int i = 0 ; i < settings.size();i++){
         ofAbstractParameter *p = &settings[i];
-   if(p->type()==typeid(ofParameter<int>).name())
-        shader.setUniform1i(p->getName(),p->cast<int>());
-    else if(p->type()==typeid(ofParameter<float>).name())
-        shader.setUniform1f(p->getName(),p->cast<float>());
-    else if(p->type()==typeid(ofParameter<ofVec3f>).name())
-        shader.setUniform3f(p->getName(),p->cast<ofVec3f>().get()[0],p->cast<ofVec3f>().get()[1],p->cast<ofVec3f>().get()[2]);
+        if(p->type()==typeid(ofParameter<int>).name())
+            shader.setUniform1i(p->getName(),p->cast<int>());
+        else if(p->type()==typeid(ofParameter<float>).name())
+            shader.setUniform1f(p->getName(),p->cast<float>());
+        else if(p->type()==typeid(ofParameter<ofVec3f>).name())
+            shader.setUniform3f(p->getName(),p->cast<ofVec3f>().get()[0],p->cast<ofVec3f>().get()[1],p->cast<ofVec3f>().get()[2]);
 
-    
-}
+
+    }
 }
 
 
@@ -74,6 +76,7 @@ void Force::updateShader(){
 Particles::Particles(VisuHandler * v):VisuClass(v){
     setup();
     isHighFPS = true;
+    lastOriType  = -1;
 
 
 }
@@ -101,18 +104,18 @@ void Particles::setup(){
     
     
     noReset = false;
-  
+
 #ifdef PIMG
     int partRes = 100 ;
-//    partImg.allocate(partRes,partRes,OF_IMAGE_COLOR_ALPHA);
+    //    partImg.allocate(partRes,partRes,OF_IMAGE_COLOR_ALPHA);
     ofVec2f center(partRes/2);
-//    for(int i = 0 ; i<partRes;i++){
-//        for(int j = 0 ; j<partRes;j++){
-//            ofVec2f curp(i,j);
-//            ofColor cc(0,0,255*max(0.,1-curp.distance(center)*1.0/partRes),255);
-//            partImg.setColor(i,j,cc);
-//        }
-//    }
+    //    for(int i = 0 ; i<partRes;i++){
+    //        for(int j = 0 ; j<partRes;j++){
+    //            ofVec2f curp(i,j);
+    //            ofColor cc(0,0,255*max(0.,1-curp.distance(center)*1.0/partRes),255);
+    //            partImg.setColor(i,j,cc);
+    //        }
+    //    }
 
     partImg.loadImage("photos/fire.jpg");
 
@@ -127,6 +130,7 @@ void Particles::setup(){
     
     MYPARAM(timeStep , 1.f,0.f,30.f);
     MYPARAM(timeStepM , 1.f,0.f,1.f);
+    MYPARAM(is2D , false,false,true);
     timeStepM.setSerializable(false);
     
     MYPARAM(numParticles , 100000,100,1000000);
@@ -150,9 +154,11 @@ void Particles::setup(){
     MYPARAM(origintype,1,0,2);
 
 #endif
-    
-    forces.push_back(new Force("continuous"));
-    forces[forces.size()-1]->addParameter("dir",ofVec3f(0,0,0),ofVec3f(0),ofVec3f(1));
+
+    forces.push_back(new Force("originDeltas"));
+    forces[forces.size()-1]->addParameter("k",.030f,0.f,.2f);
+    forces[forces.size()-1]->addParameter("stretch",ofVec3f(1,1,1),ofVec3f(0),ofVec3f(4));
+    forces[forces.size()-1]->addParameter("z",.030f,0.f,2.2f);
 
     forces.push_back(new Force("netw"));
     forces[forces.size()-1]->addParameter("k",.030f,0.f,.2f);
@@ -207,7 +213,7 @@ void Particles::setup(){
     forces.push_back(new Force("spring",true));
     forces[forces.size()-1]->addParameter("k",.030f,-.2f,1.f);
     forces[forces.size()-1]->addParameter("l0",.010f,0.f,.4f);
-    forces[forces.size()-1]->addParameter("z",.0f,-.5f,.5f);    
+    forces[forces.size()-1]->addParameter("z",.0f,-.5f,.5f);
     forces[forces.size()-1]->addParameter("mode",1,0,1);
     forces[forces.size()-1]->addParameter("distortX",1.f,0.f,2.f);
     
@@ -223,10 +229,11 @@ void Particles::setup(){
     
     
     forces.push_back(new Force("globalForce"));
-    forces[forces.size()-1]->addParameter("f",1.f,0.8f,1.f);
+    forces[forces.size()-1]->addParameter("f",1.f,0.3f,1.f);
     forces[forces.size()-1]->addParameter("fmin",1.f,0.f,1.3f);
     forces[forces.size()-1]->addParameter("vmax",1.0f,0.f,1.f);
     forces[forces.size()-1]->addParameter("vmin",.0f,0.f,1.f);
+    forces[forces.size()-1]->addParameter("comp",.0f,0.f,1.f);
 
 
     
@@ -251,9 +258,9 @@ void Particles::update(int w, int h){
     if(w!=lastw||h!=lasth){
         initFbo(w, h);
     }
-    ofSetupScreenOrtho();
-    
-    
+
+
+    ofDisableAlphaBlending();
     glBlendEquation(GL_ADD);
     glBlendFunc(GL_ONE, GL_ZERO);
     
@@ -273,23 +280,23 @@ void Particles::update(int w, int h){
             
             velPingPong.dst->end();
             velPingPong.swap();
-                
-                
-                
-//            }
+
+
+
+            //            }
         }
         else if(forces[i]->isActive ){
             int j = 0;
             vector<ofPoint> curattr = dad->attr->getType(forces[i]->attrFamilly,1,1,forces[i]->attrZone);
             if(map2blob){
-//                drawBlob * vvv = (drawBlob *)dad->get("drawBlob");
-//                for(int i = 0 ; i< curattr.size();i++){
-//                    if(vvv->invertx)curattr[i].x = 1-curattr[i].x;
-//                    if(vvv->inverty)curattr[i].y = 1-curattr[i].y;
+                //                drawBlob * vvv = (drawBlob *)dad->get("drawBlob");
+                //                for(int i = 0 ; i< curattr.size();i++){
+                //                    if(vvv->invertx)curattr[i].x = 1-curattr[i].x;
+                //                    if(vvv->inverty)curattr[i].y = 1-curattr[i].y;
 
-//                    
-//                }
-//            dad->sH.mapN2S(curattr,vvv->screenN);
+                //
+                //                }
+                //            dad->sH.mapN2S(curattr,vvv->screenN);
                 
                 
             }
@@ -298,14 +305,18 @@ void Particles::update(int w, int h){
                     velPingPong.dst->begin();
                     forces[i]->shader.begin();
                     forces[i]->shader.setUniformTexture("posData",posPingPong.src->getTextureReference(), 1);
-                    if(forces[i]->name=="origin") 
+                    if(forces[i]->name=="origin")
                         forces[i]->shader.setUniformTexture("originData",origins.getTextureReference(), 2);
+                    if(forces[i]->name=="originDeltas"){
+                        forces[i]->shader.setUniformTexture("originDeltasLR",originLR.getTextureReference(), 2);
+                        forces[i]->shader.setUniformTexture("originDeltasHB",originHB.getTextureReference(), 3);
+                    }
                     if(forces[i]->name=="fieldForce"){
                         forces[i]->shader.setUniform2f("inres",dad->inw,dad->inh);
-            #ifdef syphon
+#ifdef syphon
                         forces[i]->shader.setUniformTexture("fieldData",dad->pipePP.src->getTextureReference(), 2);
-            #endif
-                            }
+#endif
+                    }
                     if(forces[i]->attrFamilly>=0&&curattr.size()>0&&j<curattr.size()){
                         
                         forces[i]->shader.setUniform3f("attr",curattr[j].x,curattr[j].y,curattr[j].z+0.5);
@@ -321,11 +332,11 @@ void Particles::update(int w, int h){
                     
                     velPingPong.dst->end();
                     velPingPong.swap();
-                            j++;
+                    j++;
                 }while( forces[i]->attrFamilly>=0&&j<curattr.size());
             }
         }
-//        glEnd();
+        //        glEnd();
     }
     
     
@@ -334,17 +345,21 @@ void Particles::update(int w, int h){
     
     posPingPong.dst->begin();
     updatePos.begin();  // Previus position
+                        //    updatePos.setUniformTexture("tex0", posPingPong.dst->getTextureReference(), 0);      // Velocity
     updatePos.setUniformTexture("velData", velPingPong.src->getTextureReference(), 1);      // Velocity
-    updatePos.setUniform1f("timestep",timeStep*timeStepM*1.0/FPS );
+    float a = timeStep;
+    float b =timeStepM;
+    float finalTimeStep =timeStep*timeStepM*1.0f/FPS ;
+    updatePos.setUniform1f("timestep",finalTimeStep);
     updatePos.setUniform1i("resolution",textureRes);
-    
+    updatePos.setUniform1i("is2D",is2D?1:0);
     posPingPong.src->draw(0,0);
     
     
     
     updatePos.end();
     posPingPong.dst->end();
-    
+
     
     posPingPong.swap();
     
@@ -357,7 +372,7 @@ void Particles::draw(int w, int h){
 
 
     
-    
+    ofEnableAlphaBlending();
     updateRender.begin();
 
     
@@ -375,28 +390,28 @@ void Particles::draw(int w, int h){
     updateRender.setUniform2f("insize",backImage.getWidth(),backImage.getHeight());
 #endif
 
-    updateRender.setUniform1i("resolution", (int)textureRes); 
+    updateRender.setUniform1i("resolution", (int)textureRes);
     updateRender.setUniform3f("screen", w, (float)h,(float)dad->zdepth);
 
     updateRender.setUniform4f("colorpart",gradtype,color.get()[0],color.get()[1],color.get()[2]);
     updateRender.setUniform2f("gradbounds",(float)mingrad,(float)maxgrad);
-//    updateRender.setUniform3f("mouse",(float)(ofGetMouse().x),(float)(height-mouseY),(float)zdepth/2 + f.mousez);
+    //    updateRender.setUniform3f("mouse",(float)(ofGetMouse().x),(float)(height-mouseY),(float)zdepth/2 + f.mousez);
     updateRender.setUniform1f("alpha",alphaColor*alphaColorM/255.0);
     
     
     
-   
+
     
     glPointSize(particleSize*w/1000.0);
-//    glBegin( GL_POINTS ); 
-//    for(int x = 0; x < textureRes; x++){
-//        for(int y = 0; y < textureRes; y++){
-//            
-//            glVertex3d(x,y,0);
-//            
-//        }
-//    }
-//    glEnd();
+    //    glBegin( GL_POINTS );
+    //    for(int x = 0; x < textureRes; x++){
+    //        for(int y = 0; y < textureRes; y++){
+    //
+    //            glVertex3d(x,y,0);
+    //
+    //        }
+    //    }
+    //    glEnd();
     partVbo.draw(GL_POINTS,0,numParticles);
     
 
@@ -404,9 +419,10 @@ void Particles::draw(int w, int h){
     
     
     updateRender.end();
-    
-    posPingPong.src->draw(0,0,scrw/2,scrh);
-    velPingPong.src->draw(scrw/2,0,scrw/2,scrh);    
+
+//    originLR.draw(0,0,scrw/2,scrh);
+//    posPingPong.src->draw(0,0,scrw/2,scrh);
+//    velPingPong.src->draw(scrw/2,0,scrw/2,scrh);
 
 }
 
@@ -418,17 +434,69 @@ void Particles::initFbo(){
 void Particles::resetOrigins(bool & r){
     if(reset){
         reset=false;
+        int oriType = lastOriType;
+        origintype = -1;
+        origintype = oriType;
         initFbo();
     }
 }
 
+void Particles::updateDeltas(){
+    originLR.allocate(textureRes, textureRes,GL_RGB32F);
+    if(numParticles*3!=originPos.size()){
+        int a = numParticles;
+        int b = textureRes;
+        a*=1;
+        b*=1;
+        
+    };
+    float * deltas = new float[numParticles*3];
+    float scale = 1;
+    for (int x = 0; x < textureRes; x++){
+        for (int y = 0; y < textureRes; y++){
+            int i = textureRes * y + x;
+            int i2 = textureRes * y + x+1;
+            if(x==textureRes-1){
+                i2 = textureRes * y ;
+            }
+            i2*=3;
+            i*=3;
 
+
+
+            deltas[i + 0] = (originPos[i2+0] - originPos[i + 0])*scale;
+            deltas[i + 1] = (originPos[i2+1] - originPos[i + 1])*scale;
+            deltas[i + 2] = (originPos[i2+2] - originPos[i + 2])*scale;
+
+        }
+    }
+    originLR.getTextureReference().loadData(deltas, textureRes, textureRes, GL_RGB);
+    originHB.allocate(textureRes, textureRes,GL_RGB32F);
+    for (int x = 0; x < textureRes; x++){
+        for (int y = 0; y < textureRes; y++){
+            int i = textureRes * y + x;
+            int i2 = textureRes * (y+1) + x;
+            if(y==textureRes-1){
+                i2 = x;
+            }
+            i*=3;
+            i2*=3;
+            deltas[i + 0] = originPos[i2+0] - originPos[i + 0];
+            deltas[i + 1] = originPos[i2+1] - originPos[i + 1];
+            deltas[i + 2] = originPos[i2+2] - originPos[i + 2];
+
+        }
+    }
+    originHB.getTextureReference().loadData(deltas, textureRes, textureRes, GL_RGB);
+
+    delete [] deltas;
+}
 void Particles::initFbo(int w,int h){
     
     // Seting the textures where the information ( position and velocity ) will be
-//    textureResx*textureResy = numParticles;
-//    textureResx/textureResy = scrw/scrh;
- 
+    //    textureResx*textureResy = numParticles;
+    //    textureResx/textureResy = scrw/scrh;
+
     textureRes2.x = (int)sqrt((float)numParticles* w/ h);
     textureRes2.y = (int)numParticles/textureRes2.x;
     
@@ -436,62 +504,55 @@ void Particles::initFbo(int w,int h){
     numParticles = textureRes* textureRes;
     
     // Load this information in to the FBO´s texture
-if(!noReset){
+    if(!noReset){
         posPingPong.allocate(textureRes, textureRes,GL_RGB32F);
 
-    
-    // Load this information in to the FBO´s texture
-    velPingPong.allocate(textureRes, textureRes,GL_RGB32F);
-    origins.allocate(textureRes, textureRes,GL_RGB32F);
-    
-    
-    // 1. Making arrays of float pixels with position information
-    float * pos = new float[numParticles*3];
-    for (int x = 0; x < textureRes; x++){
-        for (int y = 0; y < textureRes; y++){
-            int i = textureRes * y + x;
-            
-            pos[i*3 + 0] = x*1.0/textureRes;
-            pos[i*3 + 1] = y*1.0/(textureRes);
-            pos[i*3 + 2] = 0.5;
+
+        // Load this information in to the FBO´s texture
+        velPingPong.allocate(textureRes, textureRes,GL_RGB32F);
+        origins.allocate(textureRes, textureRes,GL_RGB32F);
+
+
+        if(originPos.size() < 3*numParticles  ){
+            reset = true; // triggers resetOrigins
         }
-    }
-    
+        if(originPos.size()){
+        posPingPong.src->getTextureReference().loadData(&originPos[0], textureRes, textureRes, GL_RGB);
+        posPingPong.dst->getTextureReference().loadData(&originPos[0], textureRes, textureRes, GL_RGB);
+        origins.getTextureReference().loadData(&originPos[0], textureRes, textureRes, GL_RGB);
 
-    posPingPong.src->getTextureReference().loadData(pos, textureRes, textureRes, GL_RGB);
-    posPingPong.dst->getTextureReference().loadData(pos, textureRes, textureRes, GL_RGB);
-       
-    
-    origins.getTextureReference().loadData(pos, textureRes, textureRes, GL_RGB);
-    
-    delete [] pos;    // Delete the array
-    
-    
-    
-    
-    
-    // 2. Making arrays of float pixels with velocity information and the load it to a texture
-    float * vel = new float[numParticles*3];
-    for (int i = 0; i < numParticles; i++){
-        vel[i*3 + 0] = 0.0;
-        vel[i*3 + 1] = 0.0;
-        vel[i*3 + 2] = 0.0;//i*1.0/numParticles ;
-    }
+        updateDeltas();
+        }
 
-    velPingPong.src->getTextureReference().loadData(vel, textureRes, textureRes, GL_RGB);
-    velPingPong.dst->getTextureReference().loadData(vel, textureRes, textureRes, GL_RGB);
-    delete [] vel; // Delete the array
-    
+
+
+
+
+        // 2. Making arrays of float pixels with velocity information and the load it to a texture
+        float * vel = new float[numParticles*3];
+        for (int i = 0; i < numParticles; i++){
+            vel[i*3 + 0] = 0.0;
+            vel[i*3 + 1] = 0.0;
+            vel[i*3 + 2] = 0.0;//i*1.0/numParticles ;
+        }
+
+        velPingPong.src->getTextureReference().loadData(vel, textureRes, textureRes, GL_RGB);
+        velPingPong.dst->getTextureReference().loadData(vel, textureRes, textureRes, GL_RGB);
+        delete [] vel; // Delete the array
+
 
     }
     else{
         
-            posPingPong.src->allocate(textureRes, textureRes,GL_RGB32F);
-            posPingPong.src->begin();
-            posPingPong.dst->draw(0,0);
-            posPingPong.src->end();
-            posPingPong.dst->allocate(textureRes,textureRes,GL_RGB32F);
-       
+        posPingPong.src->allocate(textureRes, textureRes,GL_RGB32F);
+        posPingPong.src->begin();
+        posPingPong.dst->draw(0,0);
+        posPingPong.src->end();
+        posPingPong.dst->allocate(textureRes,textureRes,GL_RGB32F);
+        velPingPong.allocate(textureRes, textureRes,GL_RGB32F);
+        origins.allocate(textureRes, textureRes,GL_RGB32F);
+        updateDeltas();
+
     }
     partVbo.clear();
     partVbo.disableColors();
@@ -506,24 +567,24 @@ if(!noReset){
     }
     partVbo.setVertexData(&initPos[0],numParticles,GL_STATIC_DRAW);
 
- 
+
 }
 
 
 
 void Particles::registerParam(){
     for(int i = 0; i<forces.size();i++){
-//        vector<ofAbstractParameter * > pl = forces[i].pl; 
+        //        vector<ofAbstractParameter * > pl = forces[i].pl;
         forces[i]->settings.clear();
         settings.add(forces[i]->settings);
         
         for(int j = 0 ;j<forces[i]->pl.size();j++){
-           
+
             
             forces[i]->settings.add(*forces[i]->pl[j]);
-           
+
         }
-         
+
     }
 }
 
@@ -538,7 +599,7 @@ void Particles::changeNum(int & num){
 void Particles::changeGrad(int & i){
     ofDirectory gradDir("gradients");
     if(i<gradDir.listDir()){
-    gradDir.getFile(i).getFileName();
+        gradDir.getFile(i).getFileName();
         gradient.loadImage("gradients/"+gradDir.getFile(i).getFileName());}
 }
 
@@ -547,7 +608,8 @@ void Particles::changeGrad(int & i){
 
 void Particles::changeOrigins(int &type){
     
-    float * pos ;
+    if(type==lastOriType){return;}
+    lastOriType = type;
     bool hasChanged = true;
     
     noReset = true;
@@ -555,14 +617,14 @@ void Particles::changeOrigins(int &type){
     switch (type) {
         case 0:
         {
-            pos = new float[numParticles*3];
+            originPos.resize(numParticles*3);
             for (int x = 0; x < textureRes; x++){
                 for (int y = 0; y < textureRes; y++){
                     int i = textureRes * y + x;
                     
-                    pos[i*3 + 0] = x*1.0/textureRes;
-                    pos[i*3 + 1] = y*1.0/(textureRes);
-                    pos[i*3 + 2] = 0.5;
+                    originPos[i*3 + 0] = x*1.0/textureRes;
+                    originPos[i*3 + 1] = y*1.0/(textureRes);
+                    originPos[i*3 + 2] = 0.5;
                 }
             }
             break;}
@@ -575,65 +637,66 @@ void Particles::changeOrigins(int &type){
             textureRes = sqrt((float)curnumpart);
 
             int count=0;
-            pos = new float[curnumpart*3];
+            originPos.resize(curnumpart*3);
             for (int z = 0; z < textureRes3; z++){
                 
-            for (int x = 0; x < textureRes3; x++){
-                for (int y = 0; y < textureRes3; y++){
-                    
-                    
-                    int i = textureRes3 * textureRes3* z + textureRes3 * y + x;
-                    
-                    pos[i*3 + 0] = (float) (x*1.0/textureRes3);
-                    pos[i*3 + 1] = (float) (y*1.0/textureRes3);
-                    pos[i*3 + 2] = (float) (z*1.0/(textureRes3));
+                for (int x = 0; x < textureRes3; x++){
+                    for (int y = 0; y < textureRes3; y++){
+
+
+                        int i = textureRes3 * textureRes3* z + textureRes3 * y + x;
+                        i*=3;
+                        originPos[i + 0] = (float) (x*1.0/textureRes3);
+                        originPos[i + 1] = (float) (y*1.0/textureRes3);
+                        originPos[i + 2] = (float) (z*1.0/(textureRes3));
                         
                     }
                 }
             }
             numParticles = curnumpart;
-//            ofSort(pos,sortOnXYZ);
+            //            ofSort(pos,sortOnXYZ);
             break;}
 #ifdef PMOD
         case 2:
         {
-            
-            pos = new float[numParticles*3];
-            for (int x = 0; x < textureRes; x++){
-                for (int y = 0; y < textureRes; y++){
-                    int i = textureRes * y + x;
-                    ofPoint p(x*1.0/textureRes,y*1.0/(textureRes),0.5);
-                    dad->sH->mapN2S(p,1);
-                    pos[i*3 + 0] = 0;//p.x;
-                    pos[i*3 + 1] = 0;//p.y;
-                    pos[i*3 + 2] = 0;//0.5;
-                }
-            }
-            break;
-//            vector<ofPoint> vert = readObj("models/monkey126.obj",true);
-//            numParticles = vert.size();
-//            textureRes = sqrt((float)numParticles);
-//            numParticles = textureRes*textureRes;
+//
 //            pos = new float[numParticles*3];
 //            for (int x = 0; x < textureRes; x++){
 //                for (int y = 0; y < textureRes; y++){
-//                    int i =  x + textureRes * y;
-//                    
-//                    if(i<vert.size()){
-//                    pos[i*3 + 0] = vert[i].x;
-//                    pos[i*3 + 1] = vert[i].y;
-//                    pos[i*3 + 2] = vert[i].z +1;
-//                    }
-//                    else {
-//                        pos[i*3 + 0] = 0;
-//                        pos[i*3 + 1] = 0;
-//                        pos[i*3 + 2] = 0;
-//                    }
+//                    int i = textureRes * y + x;
+//                    ofPoint p(x*1.0/textureRes,y*1.0/(textureRes),0.5);
+//                    dad->sH->mapN2S(p,1);
+//                    pos[i*3 + 0] = 0;//p.x;
+//                    pos[i*3 + 1] = 0;//p.y;
+//                    pos[i*3 + 2] = 0;//0.5;
 //                }
 //            }
 //            break;
+                        vector<ofPoint> vert = readObj("models/sphere159.obj",true);
+                        int curNumPart = vert.size();
+                        textureRes = ceil(sqrtf((float)numParticles));
+                        curNumPart = textureRes*textureRes;
+                        originPos.resize(curNumPart*3);
+                        for (int x = 0; x < textureRes; x++){
+                            for (int y = 0; y < textureRes; y++){
+                                int i =  x + textureRes * y;
+
+                                if(i<vert.size()){
+                                originPos[i*3 + 0] = vert[i].x;
+                                originPos[i*3 + 1] = vert[i].y;
+                                originPos[i*3 + 2] = vert[i].z +1;
+                                }
+                                else {
+                                    originPos[i*3 + 0] = 0;
+                                    originPos[i*3 + 1] = 0;
+                                    originPos[i*3 + 2] = 0;
+                                }
+                            }
+                        }
+                numParticles = curNumPart;
+                        break;
         }
-    
+
 #endif
             
         default:
@@ -641,48 +704,51 @@ void Particles::changeOrigins(int &type){
             break;
     }
     if(hasChanged){
-     origins.allocate(textureRes, textureRes,GL_RGB32F);
-    origins.getTextureReference().loadData(pos, textureRes, textureRes, GL_RGB);
+        origins.allocate(textureRes, textureRes,GL_RGB32F);
+        origins.getTextureReference().loadData(&originPos[0], textureRes, textureRes, GL_RGB);
+        updateDeltas();
+//        delete [] pos;
     }
     noReset = false;
-    delete [] pos;
+
+
 }
 
 
 vector<ofPoint> Particles::readObj(string pathin,bool sort){
     vector<ofPoint> points;
-	string path = ofToDataPath(pathin, true);
-	string line;
-	
+    string path = ofToDataPath(pathin, true);
+    string line;
 
 
-	// obj file format vertexes are 1-indexed
-	points.push_back(ofPoint());
-	
-	ifstream myfile (path.c_str());
-	if (myfile.is_open()) {
-		while (! myfile.eof()) {
-			getline (myfile,line);
-			
-			
-			// parse the obj format here.
-			//
-			// the only things we're interested in is
-			// lines beginning with 'g' - this says start of new object
-			// lines beginning with 'v ' - coordinate of a vertex
-			// lines beginning with 'f ' - specifies a face of a shape
-			// 			we take each number before the slash as the index
-			// 			of the vertex to join up to create a face.
-			
-			if(line.find("g ")==0) { // new object definition
 
-			} else if(line.find("v ")==0) { // new vertex
+    // obj file format vertexes are 1-indexed
+    points.push_back(ofPoint());
+
+    ifstream myfile (path.c_str());
+    if (myfile.is_open()) {
+        while (! myfile.eof()) {
+            getline (myfile,line);
+
+
+            // parse the obj format here.
+            //
+            // the only things we're interested in is
+            // lines beginning with 'g' - this says start of new object
+            // lines beginning with 'v ' - coordinate of a vertex
+            // lines beginning with 'f ' - specifies a face of a shape
+            // 			we take each number before the slash as the index
+            // 			of the vertex to join up to create a face.
+
+            if(line.find("g ")==0) { // new object definition
+
+            } else if(line.find("v ")==0) { // new vertex
                 ofPoint p;
-				vector<string> elements = ofSplitString(line, " ");
+                vector<string> elements = ofSplitString(line, " ");
                 if(elements.size()!=4) {
                     cout<<elements[0]+elements[1]+elements[2]+ofToString(elements.size())<<endl;
                     printf("Error line does not have 3 coordinates: \"%s\"\n", line.c_str());
-                
+
                 }
                 
                 p.x = atof(elements[1].c_str());
@@ -691,15 +757,15 @@ vector<ofPoint> Particles::readObj(string pathin,bool sort){
                 points.push_back(p);
                 
                 
-			} else if(line.find("f ")==0) { // face definition
-				
-				}
-			}
-		}
-		
-		
-		myfile.close();
-		
+            } else if(line.find("f ")==0) { // face definition
+
+            }
+        }
+    }
+
+
+    myfile.close();
+
     
     if(sort){
         ofSort(points,sortOnXYZ);

@@ -183,6 +183,8 @@ void testApp::setup(){
 
 
 #ifdef GUIMODE
+//    ofxGuiSetFont(ofTrueTypeFontSettings(OF_TTF_SANS, 10));
+    ofxGuiSetDefaultHeight(10);
     liveMode = false;
     paramSync.setup(globalParam,VISU_OSC_IN,VISU_OSC_IP_OUT,VISU_OSC_OUT);
     paramSync2 = new ofxOscParameterSync();
