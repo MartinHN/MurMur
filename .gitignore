@@ -13,3 +13,4 @@ xcuserdata
 bin/data/old
 
 *.app
+bup/

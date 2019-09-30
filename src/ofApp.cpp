@@ -1,9 +1,9 @@
-#include "testApp.h"
+#include "ofApp.h"
 
 
 
 //--------------------------------------------------------------
-void testApp::setup(){
+void ofApp::setup(){
     //    ofSetDataPathRoot("../Resources/data/");
     isFPS = false;
 #ifndef GUIMODE
@@ -107,8 +107,8 @@ void testApp::setup(){
     loadName.setSerializable(false);
     MYPARAM(saveName, "", "", "");
     saveName.setSerializable(false);
-    saveName.addListener(this, &testApp::saveState);
-    loadName.addListener(this, &testApp::loadState);
+    saveName.addListener(this, &ofApp::saveState);
+    loadName.addListener(this, &ofApp::loadState);
     //#ifdef GUIMODE
     //    MYPARAM(GUIRate, 5, 1, 10);
     //#endif
@@ -224,7 +224,7 @@ void testApp::setup(){
 
 
 
-void testApp::update(){
+void ofApp::update(){
 
 
 
@@ -276,7 +276,7 @@ void testApp::update(){
 
 
 
-void testApp::draw(){
+void ofApp::draw(){
 
 #ifdef GUIMODE
     ofSetBackgroundAuto(true);
@@ -582,7 +582,7 @@ void testApp::draw(){
 
 }
 #ifdef GUIMODE
-void testApp::keyPressed(int key){
+void ofApp::keyPressed(int key){
     switch (key){
         case 's':
         {ofFileDialogResult filep = ofSystemSaveDialog("preset","save preset file");
@@ -637,14 +637,14 @@ void testApp::keyPressed(int key){
 }
 #endif
 
-void testApp::savePersistent(){
+void ofApp::savePersistent(){
     ofXml xml;
     ofSerialize(xml,bH.persistentGroup);
     xml.save(persistentSettingsPath);
     
 }
 
-void  testApp::loadPersistent(){
+void  ofApp::loadPersistent(){
     ofXml xml;
     xml.load(persistentSettingsPath);
     ofDeserialize(xml,bH.persistentGroup);
@@ -653,7 +653,7 @@ void  testApp::loadPersistent(){
 }
 #ifndef GUIMODE
 //--------------------------------------------------------------
-void testApp::keyPressed(int key){
+void ofApp::keyPressed(int key){
     int k = 0;
 
     switch (key){
@@ -730,7 +730,7 @@ void testApp::keyPressed(int key){
 
 
 
-void testApp::exit(){
+void ofApp::exit(){
 
 
 
@@ -745,7 +745,7 @@ void testApp::exit(){
 
 
 
-void testApp::mouseDragged(int x, int y, int button){
+void ofApp::mouseDragged(int x, int y, int button){
     vector<ofPoint> points;
 
     points.push_back(ofPoint(x*1.0/scrw,y*1.0/scrh,0));
@@ -754,7 +754,7 @@ void testApp::mouseDragged(int x, int y, int button){
     if(points.size()>0)attrctl.addPoints(points,0);
 
 }
-void testApp::mouseReleased(int x, int y, int button){
+void ofApp::mouseReleased(int x, int y, int button){
     vector<ofPoint> points;
 
     points.clear();
@@ -767,7 +767,7 @@ void testApp::mouseReleased(int x, int y, int button){
 
 
 //--------------------------------------------------------------
-void testApp::windowResized(int w, int h){
+void ofApp::windowResized(int w, int h){
 #ifdef GUIMODE
     scrw=w;
     scrh=h;
@@ -790,7 +790,7 @@ void testApp::windowResized(int w, int h){
 
 
 #ifdef GUIMODE
-void testApp::clientServerUpdate(){
+void ofApp::clientServerUpdate(){
     ofxOscMessage m;
     //    /// return the address
     //    string getAddress() const { return address; }
@@ -828,7 +828,7 @@ void testApp::clientServerUpdate(){
 #endif
 
 
-void testApp::saveState(string & s){
+void ofApp::saveState(string & s){
 #ifdef GUIMODE
     if(s!=""){
         string abspath = ofToDataPath("presets/filage/"+ofToString(s));
@@ -853,7 +853,7 @@ void testApp::saveState(string & s){
 
 
 
-void testApp::loadState(string & s){
+void ofApp::loadState(string & s){
     //#if defined GUIMODE || defined STANDALONEMODE
     string abspath = "";
     if(s=="")return;

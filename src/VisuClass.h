@@ -35,7 +35,7 @@ the desired width and height of screen : ofVec2f size = dad->sizeOfScreen(screen
  Every visu should be in a specified file, their header Reported in VisuWarper.h!
  
  
- their instanciation come in testApp
+ their instanciation come in ofApp
  
  visuHandler.add (new class...)
  
