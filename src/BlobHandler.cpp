@@ -281,10 +281,11 @@ void BlobHandler::getGS(){
 
 
 const ofTexture & BlobHandler::getDepthTex()const{
-#if USE_SYPHON
-    return depthTex;
-#elif USE_KINECT
+
+#if USE_KINECT
     return kinect->getDepthTexture();
+#else
+    return depthTex;
 #endif
 }
 void BlobHandler::compBlob(){
