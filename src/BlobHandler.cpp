@@ -103,9 +103,9 @@ void BlobHandler::update(){
         }
         for(int i = 0 ; i < numBlobs ; i++){ // fill blobs
             for(int j=0 ; j< blobs[i].nPts; j++){
-                blobs[i].pts[j].x=msg.getArgAsFloat(j+idx);
+                blobs[i].pts[j].x=msg.getArgAsFloat(idx);
                 idx++;
-                blobs[i].pts[j].y=msg.getArgAsFloat(j+idx);
+                blobs[i].pts[j].y=msg.getArgAsFloat(idx);
                 idx++;
                 blobs[i].pts[j].z=0;
             }
