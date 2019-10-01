@@ -30,7 +30,10 @@ background::background(VisuHandler * v):VisuClass(v){
 void background::typeChanged(int & i){
     ofDirectory dir("backgrounds");
 
-    if(i>0&&i<dir.listDir())bg.loadImage(dir.getFile(i-1));
+    if(i>0&&i<dir.listDir()){
+        dir.sort();
+        bg.loadImage(dir.getFile(i-1));
+    }
 }
 
 void background::update(int w, int h){

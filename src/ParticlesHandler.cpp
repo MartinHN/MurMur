@@ -598,7 +598,8 @@ void Particles::changeNum(int & num){
 
 void Particles::changeGrad(int & i){
     ofDirectory gradDir("gradients");
-    if(i<gradDir.listDir()){
+    if(i>=0 && i<gradDir.listDir()){
+        gradDir.sort();
         gradDir.getFile(i).getFileName();
         gradient.loadImage("gradients/"+gradDir.getFile(i).getFileName());}
 }
