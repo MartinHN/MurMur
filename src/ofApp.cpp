@@ -8,11 +8,20 @@
 #define SERVER_PORT 20000
 
 
-//#define VISU_OSC_IP_OUT "nano.local"
-//#define UI_IP "_gateway"
-#define VISU_OSC_IP_OUT "localhost"
-#define UI_IP "localhost"
+#define VISU_OSC_IP_OUT "nano.local"
+#define UI_IP "_gateway"
+//#define VISU_OSC_IP_OUT "localhost"
+//#define UI_IP "localhost"
+#include "CustomOSCSync.hpp"
+ofApp::ofApp(){
 
+}
+
+
+
+ofApp::~ofApp(){
+
+}
 //--------------------------------------------------------------
 void ofApp::setup(){
     //    ofSetDataPathRoot("../Resources/data/");
@@ -192,13 +201,14 @@ void ofApp::setup(){
     //    screensParam.setName("screensG");
     //    ofParameterGroup pg = screensParam.getGroup("screens");
 
-
+    paramSync.reset(new CustomOSCSync());
 #ifdef GUIMODE
 //    ofxGuiSetFont(ofTrueTypeFontSettings(OF_TTF_SANS, 10));
     ofxGuiSetDefaultHeight(10);
     liveMode = false;
-    paramSync.setup(globalParam,VISU_OSC_IN,VISU_OSC_IP_OUT,VISU_OSC_OUT);
-    paramSync2 = new ofxOscParameterSync();
+
+    paramSync->setup(globalParam,VISU_OSC_IN,VISU_OSC_IP_OUT,VISU_OSC_OUT);
+    paramSync2.reset(new CustomOSCSync());
     paramSync2->setup(globalParam,VISU_OSC_IN2,"localhost",VISU_OSC_OUT2);
     clientServerReceiver = new ofxOscReceiver();
     clientServerReceiver->setup(SERVER_PORT);
@@ -207,7 +217,7 @@ void ofApp::setup(){
     visuHandler.setupData();
     bH.setupData(&blurX,&blurY);
     sH.setupData();
-    paramSync.setup(globalParam,VISU_OSC_OUT,UI_IP,VISU_OSC_IN);
+    paramSync->setup(globalParam,VISU_OSC_OUT,UI_IP,VISU_OSC_IN);
 
 
 #endif
@@ -243,7 +253,7 @@ void ofApp::update(){
     clientServerUpdate();
 
 #endif
-    paramSync.update();
+    paramSync->update();
 #ifndef GUIMODE
 
     bH.update();
@@ -817,12 +827,9 @@ void ofApp::clientServerUpdate(){
                 auto port = m.getRemotePort();
 
                 ofLog() << ip +":"+ofToString(port);
-                if(paramSync2){
-                    delete paramSync2;
-                    paramSync2 = NULL;
-                }
 
-                    paramSync2 = new ofxOscParameterSync();
+
+                    paramSync2.reset( new CustomOSCSync());
 //                    delete clientServerReceiver;
 //                    clientServerReceiver = NULL;
                     paramSync2->setup(globalParam,VISU_OSC_IN2,ip,port);

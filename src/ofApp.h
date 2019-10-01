@@ -55,12 +55,14 @@
 #endif
 #include "visuWarper.h"
 
-
+class CustomOSCSync;
 
 
 
 class ofApp : public ofBaseApp{
 public:
+    ofApp();
+    ~ofApp();
     void setup();
     void update();
     void draw();
@@ -166,16 +168,16 @@ public:
     BlobHandler bH;
     AttrCtl attrctl;
     
-    ofxOscParameterSync paramSync;
+    unique_ptr<CustomOSCSync> paramSync;
 #ifdef GUIMODE
     //OSC
     ofxOscReceiver*  clientServerReceiver; // used for external controller feedback
     void clientServerUpdate();
-    ofxOscParameterSync * paramSync2;
+    unique_ptr<CustomOSCSync> paramSync2;
 #endif
 
     bool isFPS;
-    ofxOscParameterSync screenSync;
+//    unique_ptr<CustomOSCSync> screenSync;
     ofParameterGroup screensParam;
     
     
