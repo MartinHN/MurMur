@@ -16,12 +16,17 @@
 
 #include "ofMain.h"
 
+#define USE_SYPHON 0
+#define USE_KINECT 0
+#define USE_REMOTE_KINECT 1
+
+
 #if USE_SYPHON
 class ofxSyphonClient;
 #elif USE_KINECT
 class ofxKinect;
 #elif USE_REMOTE_KINECT
-class ofxOscReciever ;
+class ofxOscReceiver ;
 #endif
 
 class BlobHandler{
@@ -66,7 +71,7 @@ public:
 #elif USE_KINECT
     std::unique_ptr<ofxKinect> kinect;
 #elif USE_REMOTE_KINECT
-    std::unique_ptr<ofxOscReciever> oscRcv;
+    std::unique_ptr<ofxOscReceiver> oscRcv;
 #endif
 
 

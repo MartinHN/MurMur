@@ -14,7 +14,7 @@
 #elif USE_KINECT
 #include "ofxKinect.h"
 #elif USE_REMOTE_KINECT
-#include "ofxOsc.h"
+#include "ofxOscReceiver.h"
 #else
 #pragma error should  use at least osc kinect
 #endif
@@ -22,11 +22,11 @@
 #define USE_ONE_CHANNEL 1
 BlobHandler::BlobHandler(){
 #if USE_SYPHON
-     blobClient.reset( new ofxSyphonClient());
+    blobClient.reset( new ofxSyphonClient());
 #elif USE_KINECT
     kinect.reset(new ofxKinect());
 #elif USE_REMOTE_KINECT
-    oscRcv.reset(new ofxOscReciever());
+    oscRcv.reset(new ofxOscReceiver());
 #endif
 
 }
@@ -58,13 +58,13 @@ void BlobHandler::setupData(ofShader* blurXin,ofShader * blurYin){
     //kinect.init(false, false); // disable video image (faster fps)
 
     kinect->open();        // opens first available kinect
-                          // print the intrinsic IR sensor values
+                           // print the intrinsic IR sensor values
     if(!kinect->isConnected()) {
         ofLogError() << "can't connect kinect";
     }
 #elif USE_REMOTE_KINECT
 
-
+    oscRcv->setup(8888);
 #endif
 
 
@@ -86,6 +86,34 @@ void BlobHandler::setupData(ofShader* blurXin,ofShader * blurYin){
 
 
 void BlobHandler::update(){
+#if USE_REMOTE_KINECT
+    ofxOscMessage msg;
+    bool hadMessage = false;
+    while(oscRcv->getNextMessage(msg)){hadMessage=true;}
+    if(hadMessage){
+        int idx = 0;
+        int numBlobs = msg.getArgAsInt(0); // getNumBlobs
+        idx++;
+        blobs.resize(numBlobs);
+        for(int i = 0 ; i < numBlobs ; i++){ // get independent blobSizes
+            int blobSize = msg.getArgAsInt(idx);
+            blobs[i].pts.resize(blobSize);
+            blobs[i].nPts = blobSize;
+            idx++;
+        }
+        for(int i = 0 ; i < numBlobs ; i++){ // fill blobs
+            for(int j=0 ; j< blobs[i].nPts; j++){
+                blobs[i].pts[j].x=msg.getArgAsFloat(j+idx);
+                idx++;
+                blobs[i].pts[j].y=msg.getArgAsFloat(j+idx);
+                idx++;
+                blobs[i].pts[j].z=0;
+            }
+        }
+
+
+    }
+#endif
     if(computeBlob){
         updateDepthTex();
         getGS();
@@ -189,8 +217,8 @@ void BlobHandler::updateDepthTex(){
 #endif
 #elif USE_KINECT
     kinect->update();
-//    if(kinect.isFrameNewDepth()) { // there is a new frame and we are connected
-//        calib.computeOnTexture(kinect.getDepthTextureReference(),true);
+    //    if(kinect.isFrameNewDepth()) { // there is a new frame and we are connected
+    //        calib.computeOnTexture(kinect.getDepthTextureReference(),true);
 
 #elif USE_REMOTE_KINECT
 #endif

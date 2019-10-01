@@ -11,9 +11,6 @@
 
 //#define LIVEBLUR
 
-#define USE_SYPHON 0
-#define USE_KINECT 1
-#define USE_REMOTE_KINECT 0
 
 
 #define SYPHON_W 640
