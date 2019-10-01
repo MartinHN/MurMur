@@ -90,7 +90,7 @@ void BlobHandler::update(){
     ofxOscMessage msg;
     bool hadMessage = false;
     while(oscRcv->getNextMessage(msg)){hadMessage=true;}
-    if(hadMessage){
+    if(computeBlob && hadMessage &&  msg.getAddress()=="/blob"){
         int idx = 0;
         int numBlobs = msg.getArgAsInt(0); // getNumBlobs
         idx++;
@@ -250,7 +250,12 @@ void BlobHandler::getGS(){
 #elif USE_KINECT
     kinect->getDepthTexture().draw(0,0);
 #elif USE_REMOTE_KINECT
-#pragma error TODO
+
+    auto b = getBlobs(inw,inh);
+    if(b.size()){
+        ofSetColor(255);
+        b[0].draw();
+    }
 #endif
     if(vidThreshold>0){
         threshBW.end();
@@ -289,6 +294,7 @@ const ofTexture & BlobHandler::getDepthTex()const{
 #endif
 }
 void BlobHandler::compBlob(){
+#if USE_KINECT || USE_SYPHON
     //#if !USE_ONE_CHANNEL
     if(vidThreshold >0){
         gs.threshold(vidThreshold,invertBW);
@@ -301,6 +307,7 @@ void BlobHandler::compBlob(){
     lastcw = 1;
     lastch = 1;
 
+#endif
 
 }
 

@@ -30,11 +30,6 @@ void boule2gomme::draw(int w, int h){
 
     
 
-        ofSetColor(0,0,0,255);
-        ofRect(0, 0, 300, 25);
-        ofSetColor(255, 255, 255,255);
-        ofDrawBitmapString("Fps: " + ofToString( ofGetFrameRate()) , 15,15);
-
     ofSetColor(255);
     if(drawSyphon) dad->bH->getDepthTex().draw(0,0);
     
@@ -73,7 +68,12 @@ void boule2gomme::draw(int w, int h){
         }
     }
 
-    
+
+    ofSetColor(0,0,0,255);
+    ofDrawRectangle(0, 0, 300, 25);
+    ofSetColor(255, 255, 255,255);
+    ofDrawBitmapString("Fps: " + ofToString( ofGetFrameRate()) , 15,15);
+
 
 
 }
