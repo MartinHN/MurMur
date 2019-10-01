@@ -285,7 +285,7 @@ const ofTexture & BlobHandler::getDepthTex()const{
 #if USE_KINECT
     return kinect->getDepthTexture();
 #else
-    return depthTex;
+    return depthTex.getTexture();
 #endif
 }
 void BlobHandler::compBlob(){
