@@ -250,11 +250,19 @@ void BlobHandler::getGS(){
 #elif USE_KINECT
     kinect->getDepthTexture().draw(0,0);
 #elif USE_REMOTE_KINECT
-
+    ofSetColor(0);
+    ofDrawRectangle(0,0,inw,inh);
     auto b = getBlobs(inw,inh);
+
     if(b.size()){
-        ofSetColor(255);
-        b[0].draw();
+        ofSetColor(0);
+        ofPath pp;
+        for(auto & p:b[0]){
+            pp.lineTo(p);
+        }
+        pp.setFillColor(ofColor(255));
+        pp.draw();
+//        b[0].draw();
     }
 #endif
     if(vidThreshold>0){
