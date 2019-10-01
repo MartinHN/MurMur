@@ -255,7 +255,7 @@ void BlobHandler::getGS(){
     auto b = getBlobs(inw,inh);
 
     if(b.size()){
-        ofSetColor(0);
+        ofSetColor(255);
         ofPath pp;
         for(auto & p:b[0]){
             pp.lineTo(p);

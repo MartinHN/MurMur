@@ -13,6 +13,14 @@
 //#define VISU_OSC_IP_OUT "localhost"
 //#define UI_IP "localhost"
 #include "CustomOSCSync.hpp"
+
+template <class T>
+ofReadOnlyParameter<T,float> makeRO(ofParameter<T> & p){
+    return ofReadOnlyParameter<T,float>(p);
+}
+#define SETPERSISTENT(x) {auto ro =makeRO(x); x.setSerializable(false);persistentGroup.add(ro);}
+
+
 ofApp::ofApp(){
 
 }
@@ -158,6 +166,9 @@ void ofApp::setup(){
     MYPARAM(pipeMask,false,false,true);
     MYPARAM(cropScreen,ofVec4f(0,0,0,0),ofVec4f(0),ofVec4f(0.6))
     cropScreen.setSerializable(false);
+    MYPARAM(fullScreen,false    ,true,false);
+    fullScreen.setSerializable(false);
+    fullScreen.addListener(this, &ofApp::askFullScreen);
 
 
     settings.add(camera2.settings);
@@ -287,6 +298,13 @@ void ofApp::update(){
 
 }
 
+
+void ofApp::askFullScreen(bool & f){
+#ifndef GUIMODE
+    ofSetFullscreen(f);
+    isFullScreen = f;
+#endif
+}
 
 //--------------------------------------------------------------
 //

@@ -130,7 +130,7 @@ public:
     bool isFullScreen;
     
  
-#endif
+#endif // END NON GUIMOD
 
     
     CamHandler camera2;
@@ -145,7 +145,7 @@ public:
     ofParameter<float> brightness2,saturation2,contrast2;
     ofParameter<string> saveName;
     ofParameter<string> loadName;
-
+    ofParameter<bool> fullScreen;
     ofParameter<bool> isGloom,invertColor,isKaleidoscope;
     ofParameter<float>gloomSize;
     ofParameter<int> bloomsize,pipeAlphablur;
@@ -156,9 +156,11 @@ public:
     
     
     string persistentSettingsPath;
+    ofParameterGroup persistentGroup;
     void  loadPersistent();
     void savePersistent();
-    
+
+    void askFullScreen(bool & f);
     int zdepth;
     int inw;
     int inh;
