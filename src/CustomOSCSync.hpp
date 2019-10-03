@@ -133,13 +133,17 @@ class CustomOSCSync{
     }
 
     //--------------------------------------------------------------
-    void setup(ofParameterGroup &group, int localPort, const std::string &host, int remotePort){
+    void setup(ofParameterGroup &group, int _localPort, const std::string &host, int _remotePort){
+        localPort = _localPort;
+        remotePort = _remotePort;
         syncGroup = group;
         ofAddListener(syncGroup.parameterChangedE(), this, &CustomOSCSync::parameterChanged);
+        setRemoteIp(host);
+    }
+    void setRemoteIp(const std::string & host){
         sender.setup(host, remotePort);
         receiver.setup(localPort);
     }
-
     //--------------------------------------------------------------
     void update(){
         if(receiver.hasWaitingMessages()){
@@ -159,5 +163,6 @@ class CustomOSCSync{
     CustomRcvr receiver; ///< sync receiver
     ofParameterGroup syncGroup; ///< target parameter group
     bool updatingParameter; ///< is a parameter being updated?
-
+    int localPort;
+    int remotePort;
 };

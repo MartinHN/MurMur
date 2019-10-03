@@ -249,11 +249,13 @@ void ofApp::setup(){
 
 
 void ofApp::targetOSCChanged(bool & toRemote){
-    auto targetIp = "nano.local";
+#if GUIMODE
+    string targetIp = "nano.local";
     if(!toRemote){
         targetIp = "localhost";
     }
-    paramSync->setup(globalParam,VISU_OSC_IN,targetIp,VISU_OSC_OUT);
+    paramSync->setRemoteIp(targetIp);
+#endif
 }
 
 //--------------------------------------------------------------
