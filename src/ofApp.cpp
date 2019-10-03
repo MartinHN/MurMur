@@ -8,10 +8,10 @@
 #define SERVER_PORT 20000
 
 
-//#define VISU_OSC_IP_OUT "nano.local"
+#define VISU_OSC_IP_OUT "nano.local"
 //#define UI_IP "tintamar.local"
-#define VISU_OSC_IP_OUT "localhost"
-#define UI_IP "localhost"
+//#define VISU_OSC_IP_OUT "localhost"
+#define UI_IP "tintamar.local"
 #include "CustomOSCSync.hpp"
 
 template <class T>
@@ -169,7 +169,9 @@ void ofApp::setup(){
     MYPARAM(fullScreen,false    ,true,false);
     fullScreen.setSerializable(false);
     fullScreen.addListener(this, &ofApp::askFullScreen);
-
+    MYPARAM(sendToRemote,true,false,true);
+    sendToRemote.setSerializable(false);
+    sendToRemote.addListener(this,&ofApp::targetOSCChanged);
 
     settings.add(camera2.settings);
 
@@ -246,7 +248,13 @@ void ofApp::setup(){
 }
 
 
-
+void ofApp::targetOSCChanged(bool & toRemote){
+    auto targetIp = "nano.local";
+    if(!toRemote){
+        targetIp = "localhost";
+    }
+    paramSync->setup(globalParam,VISU_OSC_IN,targetIp,VISU_OSC_OUT);
+}
 
 //--------------------------------------------------------------
 

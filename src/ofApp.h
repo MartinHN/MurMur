@@ -142,6 +142,7 @@ public:
     ofParameter<float> brightness,brightnessM,saturation,contrast;
     ofParameter<int> rback,bback,gback;
     ofParameter<int> alphablur;
+    ofParameter<bool> sendToRemote;
     ofParameter<float> brightness2,saturation2,contrast2;
     ofParameter<string> saveName;
     ofParameter<string> loadName;
@@ -182,7 +183,7 @@ public:
 //    unique_ptr<CustomOSCSync> screenSync;
     ofParameterGroup screensParam;
     
-    
+    void targetOSCChanged(bool & b);
     ScreenHandler sH;
     
     
