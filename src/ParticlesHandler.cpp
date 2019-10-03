@@ -500,7 +500,7 @@ void Particles::initFbo(int w,int h){
     textureRes2.x = (int)sqrt((float)numParticles* w/ h);
     textureRes2.y = (int)numParticles/textureRes2.x;
     
-    textureRes = (int)sqrt((float)numParticles);
+    textureRes = MAX(1,(int)sqrt((float)numParticles));
     numParticles = textureRes* textureRes;
     
     // Load this information in to the FBO´s texture
@@ -589,7 +589,7 @@ void Particles::registerParam(){
 }
 
 void Particles::changeNum(int & num){
-    if(num!=lastnumParticles){
+    if(num>0 && num!=lastnumParticles){
         initFbo();
         lastnumParticles = num;
     }
@@ -633,8 +633,10 @@ void Particles::changeOrigins(int &type){
         {
             int zsplit = 2;
             
-            textureRes3 =  (int)pow(numParticles,1.0/3)-1;
+            textureRes3 =  MAX(1,(int)(pow(numParticles,1.0/3)+0.5));
+
             int curnumpart= textureRes3*textureRes3*textureRes3;
+            ofLog() << "texture res "<<textureRes3 << "::" << curnumpart;
             textureRes = sqrt((float)curnumpart);
 
             int count=0;

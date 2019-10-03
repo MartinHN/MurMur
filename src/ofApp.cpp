@@ -8,10 +8,10 @@
 #define SERVER_PORT 20000
 
 
-#define VISU_OSC_IP_OUT "nano.local"
-#define UI_IP "tintamar.local"
-//#define VISU_OSC_IP_OUT "localhost"
-//#define UI_IP "localhost"
+//#define VISU_OSC_IP_OUT "nano.local"
+//#define UI_IP "tintamar.local"
+#define VISU_OSC_IP_OUT "localhost"
+#define UI_IP "localhost"
 #include "CustomOSCSync.hpp"
 
 template <class T>
