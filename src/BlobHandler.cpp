@@ -88,19 +88,21 @@ void BlobHandler::setupData(ofShader* blurXin,ofShader * blurYin){
 void BlobHandler::update(){
 #if USE_REMOTE_KINECT
     ofxOscMessage msg;
-    bool hadMessage = false;
-    while(oscRcv->getNextMessage(msg)){hadMessage=true;}
+    bool hadMessage = oscRcv->getNextMessage(msg);
+//    if(){hadMessage=true;}
     if(computeBlob && hadMessage &&  msg.getAddress()=="/blob"){
-        int idx = 0;
-        int numBlobs =MIN((int)maxBlobs, msg.getArgAsInt(0)); // getNumBlobs
-        idx++;
+
+        int numRcvd =msg.getArgAsInt(0);
+        int numBlobs =MIN((int)maxBlobs, numRcvd); // getNumBlobs
+
         blobs.resize(numBlobs);
         for(int i = 0 ; i < numBlobs ; i++){ // get independent blobSizes
-            int blobSize = msg.getArgAsInt(idx);
+            int blobSize = msg.getArgAsInt(i+1);
             blobs[i].pts.resize(blobSize);
             blobs[i].nPts = blobSize;
-            idx++;
+
         }
+        int idx = numRcvd+1;
         for(int i = 0 ; i < numBlobs ; i++){ // fill blobs
             for(int j=0 ; j< blobs[i].nPts; j++){
                 blobs[i].pts[j].x=msg.getArgAsFloat(idx);
@@ -110,7 +112,8 @@ void BlobHandler::update(){
                 blobs[i].pts[j].z=0;
             }
         }
-
+        // flush any flooding messages
+        while(oscRcv->getNextMessage(msg)){}
 
     }
 #endif
