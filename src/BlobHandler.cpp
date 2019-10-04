@@ -92,7 +92,7 @@ void BlobHandler::update(){
     while(oscRcv->getNextMessage(msg)){hadMessage=true;}
     if(computeBlob && hadMessage &&  msg.getAddress()=="/blob"){
         int idx = 0;
-        int numBlobs = msg.getArgAsInt(0); // getNumBlobs
+        int numBlobs =MIN((int)maxBlobs, msg.getArgAsInt(0)); // getNumBlobs
         idx++;
         blobs.resize(numBlobs);
         for(int i = 0 ; i < numBlobs ; i++){ // get independent blobSizes
