@@ -8,6 +8,56 @@
 
 class CustomSender : public ofxOscSender{
 public:
+
+    //--------------------------------------------------------------
+    void appendParameter(ofxOscBundle &_bundle, const ofAbstractParameter &parameter, const std::string &address){
+        if(parameter.type() == typeid(ofParameterGroup).name()){
+            ofxOscBundle bundle;
+            const ofParameterGroup &group = static_cast<const ofParameterGroup &>(parameter);
+            for(std::size_t i = 0; i < group.size(); i++){
+                const ofAbstractParameter & p = group[i];
+                //            if(p.isSerializable()){
+                appendParameter(bundle, p, address+group.getEscapedName()+"/");
+                //            }
+            }
+            _bundle.addBundle(bundle);
+        }
+        else{
+            //        if(parameter.isSerializable()){
+            ofxOscMessage msg;
+            appendParameter(msg, parameter, address);
+            _bundle.addMessage(msg);
+            //        }
+        }
+    }
+
+    //--------------------------------------------------------------
+    void sendParameter(const ofAbstractParameter &parameter){
+        //    if(!parameter.isSerializable()) return;
+        if(parameter.type() == typeid(ofParameterGroup).name()){
+            std::string address = "/";
+            const std::vector<std::string> hierarchy = parameter.getGroupHierarchyNames();
+            for(int i = 0; i < (int)hierarchy.size()-1; i++){
+                address += hierarchy[i] + "/";
+            }
+            ofxOscBundle bundle;
+            appendParameter(bundle, parameter, address);
+            sendBundle(bundle);
+        }
+        else{
+            std::string address = "";
+            const std::vector<std::string> hierarchy = parameter.getGroupHierarchyNames();
+            for(int i = 0; i < (int)hierarchy.size()-1; i++){
+                address += "/" + hierarchy[i];
+            }
+            if(address.length()) {
+                address += "/";
+            }
+            ofxOscMessage msg;
+            appendParameter(msg, parameter, address);
+            sendMessage(msg, false);
+        }
+    }
     void appendParameter(ofxOscMessage &msg, const ofAbstractParameter &parameter, const std::string &address){
         msg.setAddress(address+parameter.getEscapedName());
         if(parameter.type() == typeid(ofParameter<int>).name()){
@@ -22,6 +72,24 @@ public:
         else if(parameter.type() == typeid(ofParameter<bool>).name()){
             msg.addBoolArg(parameter.cast<bool>());
         }
+        else if(parameter.type() == typeid(ofParameter<ofVec2f>).name()){
+            const auto v= parameter.cast<ofVec2f>().get();
+            msg.addFloatArg(v.x);
+            msg.addFloatArg(v.y);
+        }
+        else if(parameter.type() == typeid(ofParameter<ofVec3f>).name()){
+            const auto v= parameter.cast<ofVec3f>().get();
+            msg.addFloatArg(v.x);
+            msg.addFloatArg(v.y);
+            msg.addFloatArg(v.z);
+        }
+        else if(parameter.type() == typeid(ofParameter<ofVec4f>).name()){
+            const auto v= parameter.cast<ofVec4f>().get();
+            msg.addFloatArg(v.x);
+            msg.addFloatArg(v.y);
+            msg.addFloatArg(v.z);
+            msg.addFloatArg(v.w);
+        }
         else{
             msg.addStringArg(parameter.toString());
         }
@@ -33,6 +101,7 @@ public:
     bool getParameter(ofAbstractParameter &parameter){
         ofxOscMessage msg;
         while(getNextMessage(msg)){
+            if(msg.getAddress()=="/ping"){continue;}
             ofAbstractParameter * p = &parameter;
             std::vector<std::string> address = ofSplitString(msg.getAddress(),"/", true);
             for(unsigned int i = 0; i < address.size(); i++){
